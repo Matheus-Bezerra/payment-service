@@ -22,6 +22,7 @@ Não reabra essas decisões sem o usuário pedir.
 | Entidades, VOs, enums, invariantes, eventos | [`.docs/domain-model.md`](.docs/domain-model.md) |
 | Tabelas, constraints, locks, outbox, Flyway | [`.docs/database-design.md`](.docs/database-design.md) |
 | Contrato HTTP, erros, `Idempotency-Key` | [`.docs/api-spec.md`](.docs/api-spec.md) |
+| Ordem das etapas e commits | [`.docs/implementation-checklist.md`](.docs/implementation-checklist.md) |
 | Enunciado original do desafio | [`README.md`](README.md) |
 | Pastas, ports, adapters, outbox, testes | [`../spring-hexagonal-architecture/SKILL.md`](../spring-hexagonal-architecture/SKILL.md) |
 | Detalhe de camadas / feature atravessando domínio | [`../spring-hexagonal-architecture/ARCHITECTURE.md`](../spring-hexagonal-architecture/ARCHITECTURE.md) |
@@ -40,9 +41,13 @@ Em conflito: `.docs` > README do desafio > inferência. A skill manda em **estru
 
 ## Ordem ao implementar
 
-1. Domínio (modelo, invariantes, eventos, exceções).
-2. Application service + ports.
-3. Adapter in (HTTP) e out (JPA, autorizador, outbox/RabbitMQ).
-4. Testes no limite que mudou.
+Siga [`.docs/implementation-checklist.md`](.docs/implementation-checklist.md). Resumo:
+
+1. Setup (Maven, Actuator, Docker, Postgres oficial).
+2. Schema Flyway.
+3. Domínio (modelo, invariantes, eventos, `TransferPolicy` POL-01 → POL-04).
+4. Application service + ports.
+5. Adapter out persistência, depois in HTTP, autorizador, outbox/RabbitMQ.
+6. Seed. Testes no limite que a etapa mudou.
 
 Fila não processa transferência. Worker só notifica depois do commit.

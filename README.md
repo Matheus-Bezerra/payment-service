@@ -6,7 +6,38 @@ Implementação do desafio back-end [PicPay Simplificado](https://github.com/Pic
 
 O recorte principal é o fluxo de **`POST /transfer`**. Cadastro, autenticação e frontend não entram na avaliação do desafio (seed de usuários basta).
 
-Documentação de regras, modelo, schema e contrato HTTP: [`.docs/`](.docs/).
+Documentação de regras, modelo, schema, contrato HTTP e checklist de implementação: [`.docs/`](.docs/).
+
+**Stack de implementação:** Java 25, Spring Boot 4.1, Maven, PostgreSQL 18, Docker Compose.
+
+---
+
+## Como executar
+
+### Tudo no Docker
+
+```bash
+docker compose up --build
+```
+
+Sobe PostgreSQL (`postgres:18`) e a API na porta `8080`.
+
+### Só o banco no Docker (API no IDE / Maven)
+
+```bash
+docker compose up postgres
+SPRING_PROFILES_ACTIVE=local ./mvnw spring-boot:run
+```
+
+### Health check
+
+```bash
+curl -s http://localhost:8080/actuator/health
+```
+
+Esperado: status `UP` (com detalhe `db` `UP` quando o Postgres estiver acessível).
+
+Checklist de etapas: [`.docs/implementation-checklist.md`](.docs/implementation-checklist.md).
 
 ---
 
