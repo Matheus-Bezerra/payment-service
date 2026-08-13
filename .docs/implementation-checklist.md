@@ -50,7 +50,7 @@ Objetivo: `docker compose up --build` sobe Postgres oficial e a API; `GET /actua
 - [x] Pacotes `domain/`, `application/`, `adapter/` vazios.
 - [x] Tabelas de negócio, entidades JPA, controllers, Swagger.
 - [x] RabbitMQ no Compose ou no `pom`.
-- [x] Secrets de produção versionados. Senha local `picpay` no Compose é aceitável para o desafio.
+- [x] Secrets de produção versionados. Senha local `payment` no Compose é aceitável para o desafio.
 
 ### Aceite
 
@@ -64,10 +64,10 @@ Objetivo: `docker compose up --build` sobe Postgres oficial e a API; `GET /actua
 
 Objetivo: banco com as tabelas do [database-design.md](database-design.md). Sem JPA ainda, se a etapa ficar mais fácil de revisar.
 
-- [ ] `V1` (ou equivalente): `users`, `wallets`, `transactions`, `notification_outbox`.
-- [ ] PKs/FKs `uuid` (UUID v7). Sem `BIGSERIAL`, `gen_random_uuid()` ou ULID.
-- [ ] Constraints e índices do documento (documento/e-mail únicos, `idempotency_key UNIQUE NOT NULL`, checks de saldo/status).
-- [ ] Compose sobe e Flyway aplica no boot da API.
+- [x] `V1` (ou equivalente): `users`, `wallets`, `transactions`, `notification_outbox`.
+- [x] PKs/FKs `uuid` (UUID v7). Sem `BIGSERIAL`, `gen_random_uuid()` ou ULID.
+- [x] Constraints e índices do documento (documento/e-mail únicos, `idempotency_key UNIQUE NOT NULL`, checks de saldo/status).
+- [x] Compose sobe e Flyway aplica no boot da API.
 
 Não incluir entidades JPA, repositórios nem seed (seed é a etapa 9).
 
