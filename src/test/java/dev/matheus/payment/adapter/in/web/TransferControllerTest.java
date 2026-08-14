@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import dev.matheus.payment.adapter.in.web.controller.TransferController;
 import dev.matheus.payment.adapter.in.web.exception.GlobalExceptionHandler;
 import dev.matheus.payment.adapter.in.web.mapper.TransferWebMapperImpl;
+import dev.matheus.payment.application.exception.AuthorizationUnavailableException;
 import dev.matheus.payment.application.result.TransferResult;
 import dev.matheus.payment.application.service.TransferService;
 import dev.matheus.payment.domain.enums.TransactionStatus;
@@ -178,6 +179,15 @@ class TransferControllerTest {
 
         postTransfer(body("20000.01", PAYER, PAYEE), IDEMPOTENCY_KEY)
                 .andExpect(problem("transfer-amount-limit-exceeded", 422));
+    }
+
+    @Test
+    void authorizerUnavailableReturns502() throws Exception {
+        when(transferService.transfer(any()))
+                .thenThrow(new AuthorizationUnavailableException("authorization service unavailable"));
+
+        postTransfer(body("100.00", PAYER, PAYEE), IDEMPOTENCY_KEY)
+                .andExpect(problem("authorization-service-unavailable", 502));
     }
 
     private ResultActions postTransfer(String json, String idempotencyKey) throws Exception {

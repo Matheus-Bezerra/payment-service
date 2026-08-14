@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import dev.matheus.payment.application.command.TransferCommand;
+import dev.matheus.payment.application.exception.AuthorizationUnavailableException;
 import dev.matheus.payment.application.exception.DuplicateIdempotencyKeyException;
 import dev.matheus.payment.application.exception.TransferAlreadyFailedException;
 import dev.matheus.payment.application.result.TransferResult;
@@ -188,6 +189,32 @@ class TransferServiceTest {
         ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
         verify(transactionRepository).update(captor.capture());
         assertEquals(TransactionStatus.FAILED, captor.getValue().status());
+        verify(outboxPort, never()).save(any());
+    }
+
+    @Test
+    void authorizerUnavailableFailsWithoutMovingBalance() {
+        stubCommonUsersAndWallets(UserType.COMMON);
+        when(clockPort.now()).thenReturn(DAYTIME);
+        when(transactionRepository.sumPayerCompletedOrInProgressToday(any(), any(), any(), any()))
+                .thenReturn(Money.zero());
+        when(transactionRepository.countPayerCompletedOrInProgressSince(any(), any(), any()))
+                .thenReturn(0);
+        when(authorizationPort.authorize())
+                .thenThrow(new AuthorizationUnavailableException("authorization service unavailable"));
+
+        assertThrows(
+                AuthorizationUnavailableException.class,
+                () -> transferService.transfer(command("50.00"))
+        );
+
+        assertEquals(new BigDecimal("1000.00"), payerWallet.balance().amount());
+        assertEquals(new BigDecimal("100.00"), payeeWallet.balance().amount());
+        ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
+        verify(transactionRepository).update(captor.capture());
+        assertEquals(TransactionStatus.FAILED, captor.getValue().status());
+        assertEquals("authorization service unavailable", captor.getValue().failureReason());
+        verify(walletRepository, never()).lockByOwnerIds(any(), any());
         verify(outboxPort, never()).save(any());
     }
 
