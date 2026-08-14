@@ -131,11 +131,11 @@ Objetivo: contrato de [api-spec.md](api-spec.md) no `POST /transfer`.
 
 Objetivo: consulta síncrona ao mock antes de finalizar a transferência.
 
-- [ ] Cliente HTTP em `adapter/out/client` implementando a port.
-- [ ] `GET https://util.devi.tools/api/v2/authorize`.
-- [ ] Timeout e mapeamento de recusa/indisponibilidade.
-- [ ] Política interna roda **antes** do autorizador (não gasta o mock se o limite já barra).
-- [ ] Testes do adapter (WireMock ou equivalente).
+- [x] Cliente HTTP em `adapter/out/client` implementando a port.
+- [x] `GET https://util.devi.tools/api/v2/authorize`.
+- [x] Timeout e mapeamento de recusa/indisponibilidade.
+- [x] Política interna roda **antes** do autorizador (não gasta o mock se o limite já barra).
+- [x] Testes do adapter (WireMock ou equivalente).
 
 ---
 
