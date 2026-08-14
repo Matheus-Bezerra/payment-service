@@ -84,6 +84,37 @@ public final class Transaction {
         );
     }
 
+    public static Transaction reconstitute(
+            TransactionId id,
+            IdempotencyKey idempotencyKey,
+            UserId payerId,
+            UserId payeeId,
+            Money amount,
+            TransactionStatus status,
+            String failureReason,
+            Instant createdAt,
+            Instant completedAt
+    ) {
+        Objects.requireNonNull(id, "id is required");
+        Objects.requireNonNull(idempotencyKey, "idempotency key is required");
+        Objects.requireNonNull(payerId, "payer id is required");
+        Objects.requireNonNull(payeeId, "payee id is required");
+        Objects.requireNonNull(amount, "amount is required");
+        Objects.requireNonNull(status, "status is required");
+        Objects.requireNonNull(createdAt, "created at is required");
+        return new Transaction(
+                id,
+                idempotencyKey,
+                payerId,
+                payeeId,
+                amount,
+                status,
+                failureReason,
+                createdAt,
+                completedAt
+        );
+    }
+
     public void complete() {
         if (status != TransactionStatus.IN_PROGRESS && status != TransactionStatus.AUTHORIZED) {
             throw new InvalidTransactionStateException(
