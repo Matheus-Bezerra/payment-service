@@ -117,13 +117,13 @@ Objetivo: JPA implementa os ports de repositório.
 
 Objetivo: contrato de [api-spec.md](api-spec.md) no `POST /transfer`.
 
-- [ ] Interface de API + anotações OpenAPI em `adapter/in/web/api`.
-- [ ] Controller fino; DTOs em `request` / `response`; mapper para tipos internos.
-- [ ] Header `Idempotency-Key` obrigatório; ausente → `400`.
-- [ ] `payer` / `payee` / `id` como UUID v7 no JSON.
-- [ ] Erros em RFC 7807 `ProblemDetail`.
-- [ ] Não expor entidade de domínio nem JPA.
-- [ ] Testes MockMvc do contrato e dos erros.
+- [x] Interface de API + anotações OpenAPI em `adapter/in/web/api`.
+- [x] Controller fino; DTOs em `request` / `response`; mapper para tipos internos.
+- [x] Header `Idempotency-Key` obrigatório; ausente → `400`.
+- [x] `payer` / `payee` / `id` como UUID v7 no JSON.
+- [x] Erros em RFC 7807 `ProblemDetail`.
+- [x] Não expor entidade de domínio nem JPA.
+- [x] Testes MockMvc do contrato e dos erros.
 
 ---
 
