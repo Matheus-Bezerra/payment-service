@@ -1,7 +1,9 @@
 package dev.matheus.payment.application.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -11,6 +13,8 @@ import static org.mockito.Mockito.when;
 
 import dev.matheus.payment.application.command.TransferCommand;
 import dev.matheus.payment.application.exception.DuplicateIdempotencyKeyException;
+import dev.matheus.payment.application.exception.TransferAlreadyFailedException;
+import dev.matheus.payment.application.result.TransferResult;
 import dev.matheus.payment.application.port.out.AuthorizationPort;
 import dev.matheus.payment.application.port.out.ClockPort;
 import dev.matheus.payment.application.port.out.OutboxPort;
@@ -114,14 +118,15 @@ class TransferServiceTest {
         when(authorizationPort.authorize()).thenReturn(true);
         stubLockWallets();
 
-        Transaction result = transferService.transfer(command("50.00"));
+        TransferResult result = transferService.transfer(command("50.00"));
 
-        assertEquals(TransactionStatus.COMPLETED, result.status());
+        assertFalse(result.replay());
+        assertEquals(TransactionStatus.COMPLETED, result.transaction().status());
         assertEquals(new BigDecimal("950.00"), payerWallet.balance().amount());
         assertEquals(new BigDecimal("150.00"), payeeWallet.balance().amount());
         verify(walletRepository).update(payerWallet);
         verify(walletRepository).update(payeeWallet);
-        verify(transactionRepository).update(result);
+        verify(transactionRepository).update(result.transaction());
         verify(outboxPort).save(any(TransferCompleted.class));
     }
 
@@ -202,10 +207,38 @@ class TransferServiceTest {
         when(transactionRepository.requireByIdempotencyKeyForUpdate(IdempotencyKey.of("same-key")))
                 .thenReturn(existing);
 
-        Transaction result = transferService.transfer(command("50.00", "same-key"));
+        TransferResult result = transferService.transfer(command("50.00", "same-key"));
 
-        assertEquals(existing, result);
-        assertEquals(TransactionStatus.COMPLETED, result.status());
+        assertTrue(result.replay());
+        assertEquals(existing, result.transaction());
+        assertEquals(TransactionStatus.COMPLETED, result.transaction().status());
+        verify(authorizationPort, never()).authorize();
+        verify(walletRepository, never()).lockByOwnerIds(any(), any());
+        verify(outboxPort, never()).save(any());
+    }
+
+    @Test
+    void idempotentReplayOfFailedThrowsWithoutReprocessing() {
+        Transaction existing = Transaction.start(
+                payerId,
+                payeeId,
+                Money.ofTransfer(new BigDecimal("50.00")),
+                IdempotencyKey.of("same-key")
+        );
+        existing.fail("merchants cannot send money");
+
+        doThrow(new DuplicateIdempotencyKeyException("duplicate"))
+                .when(transactionRepository)
+                .insertInProgress(any());
+        when(transactionRepository.requireByIdempotencyKeyForUpdate(IdempotencyKey.of("same-key")))
+                .thenReturn(existing);
+
+        TransferAlreadyFailedException ex = assertThrows(
+                TransferAlreadyFailedException.class,
+                () -> transferService.transfer(command("50.00", "same-key"))
+        );
+
+        assertEquals("merchants cannot send money", ex.getMessage());
         verify(authorizationPort, never()).authorize();
         verify(walletRepository, never()).lockByOwnerIds(any(), any());
         verify(outboxPort, never()).save(any());
