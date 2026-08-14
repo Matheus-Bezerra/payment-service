@@ -77,11 +77,11 @@ Não incluir entidades JPA, repositórios nem seed (seed é a etapa 9).
 
 Objetivo: regras e invariantes isoladas, sem Spring/JPA/HTTP/RabbitMQ.
 
-- [ ] Modelo, value objects, enums, exceções e eventos (nomes no passado).
-- [ ] Identificadores UUID v7 gerados na aplicação. Sem `UUID.randomUUID()` em PK.
-- [ ] `TransferPolicy` em `domain/service`, pura (snapshot + `Instant`). Timezone `America/Sao_Paulo`.
-- [ ] Política na ordem: POL-01 → POL-02 → POL-03 → POL-04 (pode ser mais de um commit dentro desta etapa).
-- [ ] Testes de unidade do domínio e da política.
+- [x] Modelo, value objects, enums, exceções e eventos (nomes no passado).
+- [x] Identificadores UUID v7 gerados na aplicação. Sem `UUID.randomUUID()` em PK.
+- [x] `TransferPolicy` em `domain/service`, pura (snapshot + `Instant`). Timezone `America/Sao_Paulo`.
+- [x] Política na ordem: POL-01 → POL-02 → POL-03 → POL-04 (pode ser mais de um commit dentro desta etapa).
+- [x] Testes de unidade do domínio e da política.
 
 Leia só [domain-model.md](domain-model.md) e as regras em [requirements.md](requirements.md).
 
