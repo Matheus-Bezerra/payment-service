@@ -91,11 +91,11 @@ Leia só [domain-model.md](domain-model.md) e as regras em [requirements.md](req
 
 Objetivo: orquestração da transferência síncrona, sem conhecer controller, JPA ou broker.
 
-- [ ] Application service da transferência.
-- [ ] Ports de saída: persistência, autorizador, outbox (interfaces). Sem `port/in` a menos que traga ganho real.
-- [ ] Idempotência: `Idempotency-Key` obrigatória; `INSERT` `IN_PROGRESS`; replay espera se ainda `IN_PROGRESS`.
-- [ ] Service não recebe DTO HTTP/mensageria.
-- [ ] Testes do service com ports mockadas.
+- [x] Application service da transferência.
+- [x] Ports de saída: persistência, autorizador, outbox (interfaces). Sem `port/in` a menos que traga ganho real.
+- [x] Idempotência: `Idempotency-Key` obrigatória; `INSERT` `IN_PROGRESS`; replay espera se ainda `IN_PROGRESS`.
+- [x] Service não recebe DTO HTTP/mensageria.
+- [x] Testes do service com ports mockadas.
 
 Fila não entra no fluxo síncrono do `POST /transfer`.
 
