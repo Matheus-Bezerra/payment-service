@@ -32,6 +32,7 @@ import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionOperations;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +44,7 @@ public class TransferService {
     private final AuthorizationPort authorizationPort;
     private final OutboxPort outboxPort;
     private final ClockPort clockPort;
+    private final TransactionOperations transactionOperations;
 
     public Transaction transfer(TransferCommand command) {
         Transaction transaction = Transaction.start(
@@ -127,39 +129,43 @@ public class TransferService {
     }
 
     private Transaction settle(Transaction transaction) {
-        UserId payerId = transaction.payerId();
-        UserId payeeId = transaction.payeeId();
+        return transactionOperations.execute(status -> {
+            UserId payerId = transaction.payerId();
+            UserId payeeId = transaction.payeeId();
 
-        UserId first = min(payerId, payeeId);
-        UserId second = payerId.equals(first) ? payeeId : payerId;
+            UserId first = min(payerId, payeeId);
+            UserId second = payerId.equals(first) ? payeeId : payerId;
 
-        List<Wallet> locked = walletRepository.lockByOwnerIds(first, second);
-        Wallet payerWallet = walletByOwner(locked, payerId);
-        Wallet payeeWallet = walletByOwner(locked, payeeId);
+            List<Wallet> locked = walletRepository.lockByOwnerIds(first, second);
+            Wallet payerWallet = walletByOwner(locked, payerId);
+            Wallet payeeWallet = walletByOwner(locked, payeeId);
 
-        payerWallet.debit(transaction.amount());
-        payeeWallet.credit(transaction.amount());
-        transaction.complete();
+            payerWallet.debit(transaction.amount());
+            payeeWallet.credit(transaction.amount());
+            transaction.complete();
 
-        walletRepository.update(payerWallet);
-        walletRepository.update(payeeWallet);
-        transactionRepository.update(transaction);
+            walletRepository.update(payerWallet);
+            walletRepository.update(payeeWallet);
+            transactionRepository.update(transaction);
 
-        for (DomainEvent event : transaction.pullEvents()) {
-            if (event instanceof TransferCompleted completed) {
-                outboxPort.save(completed);
+            for (DomainEvent event : transaction.pullEvents()) {
+                if (event instanceof TransferCompleted completed) {
+                    outboxPort.save(completed);
+                }
             }
-        }
 
-        return transaction;
+            return transaction;
+        });
     }
 
     private void markFailed(Transaction transaction, String reason) {
         if (transaction.status() != TransactionStatus.IN_PROGRESS) {
             return;
         }
-        transaction.fail(reason);
-        transactionRepository.update(transaction);
+        transactionOperations.executeWithoutResult(status -> {
+            transaction.fail(reason);
+            transactionRepository.update(transaction);
+        });
     }
 
     private User requireUser(UserId id, String role) {
