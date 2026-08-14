@@ -2,6 +2,8 @@ package dev.matheus.payment.application.service;
 
 import dev.matheus.payment.application.command.TransferCommand;
 import dev.matheus.payment.application.exception.DuplicateIdempotencyKeyException;
+import dev.matheus.payment.application.exception.TransferAlreadyFailedException;
+import dev.matheus.payment.application.result.TransferResult;
 import dev.matheus.payment.application.port.out.AuthorizationPort;
 import dev.matheus.payment.application.port.out.ClockPort;
 import dev.matheus.payment.application.port.out.OutboxPort;
@@ -46,7 +48,7 @@ public class TransferService {
     private final ClockPort clockPort;
     private final TransactionOperations transactionOperations;
 
-    public Transaction transfer(TransferCommand command) {
+    public TransferResult transfer(TransferCommand command) {
         Transaction transaction = Transaction.start(
                 command.payerId(),
                 command.payeeId(),
@@ -77,14 +79,14 @@ public class TransferService {
                 throw new TransferNotAuthorizedException("transfer was not authorized");
             }
 
-            return settle(transaction);
+            return new TransferResult(settle(transaction), false);
         } catch (DomainException ex) {
             markFailed(transaction, ex.getMessage());
             throw ex;
         }
     }
 
-    private Transaction replayExisting(TransferCommand command) {
+    private TransferResult replayExisting(TransferCommand command) {
         Transaction existing = transactionRepository.requireByIdempotencyKeyForUpdate(
                 command.idempotencyKey()
         );
@@ -95,7 +97,11 @@ public class TransferService {
             );
         }
 
-        return existing;
+        if (existing.status() == TransactionStatus.FAILED) {
+            throw new TransferAlreadyFailedException(existing.failureReason());
+        }
+
+        return new TransferResult(existing, true);
     }
 
     private void assertPolicy(Transaction transaction, TransferCommand command) {
