@@ -1,5 +1,6 @@
 package dev.matheus.payment.adapter.in.web.exception;
 
+import dev.matheus.payment.application.exception.AuthorizationUnavailableException;
 import dev.matheus.payment.application.exception.TransferAlreadyFailedException;
 import dev.matheus.payment.domain.exception.DailyTransferLimitExceededException;
 import dev.matheus.payment.domain.exception.IdempotencyKeyConflictException;
@@ -192,10 +193,23 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(AuthorizationUnavailableException.class)
+    ResponseEntity<ProblemDetail> handleAuthorizerUnavailable(AuthorizationUnavailableException ex) {
+        return problem(
+                HttpStatus.BAD_GATEWAY,
+                "authorization-service-unavailable",
+                "Authorization service unavailable",
+                messageOrDefault(ex, "authorization service unavailable")
+        );
+    }
+
     @ExceptionHandler(TransferAlreadyFailedException.class)
     ResponseEntity<ProblemDetail> handleAlreadyFailed(TransferAlreadyFailedException ex) {
         String detail = messageOrDefault(ex, "Transfer already failed");
         String lower = detail.toLowerCase();
+        if (lower.contains("unavailable") || lower.contains("timeout")) {
+            return handleAuthorizerUnavailable(new AuthorizationUnavailableException(detail));
+        }
         if (lower.contains("merchant")) {
             return handleMerchant(new MerchantCannotSendMoneyException(detail));
         }

@@ -1,6 +1,7 @@
 package dev.matheus.payment.application.service;
 
 import dev.matheus.payment.application.command.TransferCommand;
+import dev.matheus.payment.application.exception.AuthorizationUnavailableException;
 import dev.matheus.payment.application.exception.DuplicateIdempotencyKeyException;
 import dev.matheus.payment.application.exception.TransferAlreadyFailedException;
 import dev.matheus.payment.application.result.TransferResult;
@@ -80,7 +81,7 @@ public class TransferService {
             }
 
             return new TransferResult(settle(transaction), false);
-        } catch (DomainException ex) {
+        } catch (DomainException | AuthorizationUnavailableException ex) {
             markFailed(transaction, ex.getMessage());
             throw ex;
         }

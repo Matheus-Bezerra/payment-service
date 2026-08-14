@@ -25,3 +25,9 @@ management:
 
 server:
   port: ${SERVER_PORT:8080}
+
+payment:
+  authorizer:
+    base-url: ${PAYMENT_AUTHORIZER_BASE_URL:https://util.devi.tools}
+    connect-timeout: 2s
+    read-timeout: 2s
