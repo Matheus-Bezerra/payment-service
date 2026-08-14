@@ -3,16 +3,22 @@ package dev.matheus.payment.domain.model;
 import dev.matheus.payment.domain.enums.DocumentType;
 import dev.matheus.payment.domain.exception.InvalidDocumentException;
 import java.util.Objects;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
+@Getter
+@Accessors(fluent = true)
+@EqualsAndHashCode
+@ToString
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Document {
 
     private final DocumentType type;
     private final String value;
-
-    private Document(DocumentType type, String value) {
-        this.type = type;
-        this.value = value;
-    }
 
     public static Document of(DocumentType type, String rawValue) {
         if (type == null) {
@@ -30,34 +36,5 @@ public final class Document {
             );
         }
         return new Document(type, digits);
-    }
-
-    public DocumentType type() {
-        return type;
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Document document)) {
-            return false;
-        }
-        return type == document.type && value.equals(document.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(type, value);
-    }
-
-    @Override
-    public String toString() {
-        return type + ":" + value;
     }
 }

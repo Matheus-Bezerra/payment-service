@@ -2,9 +2,19 @@ package dev.matheus.payment.domain.model;
 
 import dev.matheus.payment.domain.exception.InvalidEmailException;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.regex.Pattern;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
+@Getter
+@Accessors(fluent = true)
+@EqualsAndHashCode
+@ToString
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Email {
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
@@ -12,10 +22,6 @@ public final class Email {
     );
 
     private final String value;
-
-    private Email(String value) {
-        this.value = value;
-    }
 
     public static Email of(String rawValue) {
         if (rawValue == null || rawValue.isBlank()) {
@@ -26,30 +32,5 @@ public final class Email {
             throw new InvalidEmailException("invalid email format");
         }
         return new Email(normalized);
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Email email)) {
-            return false;
-        }
-        return value.equals(email.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(value);
-    }
-
-    @Override
-    public String toString() {
-        return value;
     }
 }

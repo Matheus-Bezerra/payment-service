@@ -5,17 +5,20 @@ import dev.matheus.payment.domain.exception.InvalidMoneyException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 
+@Getter
+@Accessors(fluent = true)
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Money {
 
     private static final String CURRENCY = "BRL";
     private static final int SCALE = 2;
 
     private final BigDecimal amount;
-
-    private Money(BigDecimal amount) {
-        this.amount = amount;
-    }
 
     public static Money ofTransfer(BigDecimal amount) {
         BigDecimal normalized = normalize(amount);
@@ -68,10 +71,6 @@ public final class Money {
 
     public boolean isGreaterThanOrEqualTo(Money other) {
         return this.amount.compareTo(other.amount) >= 0;
-    }
-
-    public BigDecimal amount() {
-        return amount;
     }
 
     public String currency() {

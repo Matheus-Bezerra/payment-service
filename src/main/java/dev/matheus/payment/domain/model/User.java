@@ -2,7 +2,14 @@ package dev.matheus.payment.domain.model;
 
 import dev.matheus.payment.domain.enums.UserType;
 import java.util.Objects;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.Accessors;
 
+@Getter
+@Accessors(fluent = true)
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class User {
 
     private final UserId id;
@@ -11,22 +18,6 @@ public final class User {
     private final Email email;
     private final String passwordHash;
     private final UserType type;
-
-    private User(
-            UserId id,
-            String fullName,
-            Document document,
-            Email email,
-            String passwordHash,
-            UserType type
-    ) {
-        this.id = id;
-        this.fullName = fullName;
-        this.document = document;
-        this.email = email;
-        this.passwordHash = passwordHash;
-        this.type = type;
-    }
 
     public static User create(
             UserId id,
@@ -51,29 +42,5 @@ public final class User {
 
     public boolean canSendMoney() {
         return type == UserType.COMMON;
-    }
-
-    public UserId id() {
-        return id;
-    }
-
-    public String fullName() {
-        return fullName;
-    }
-
-    public Document document() {
-        return document;
-    }
-
-    public Email email() {
-        return email;
-    }
-
-    public String passwordHash() {
-        return passwordHash;
-    }
-
-    public UserType type() {
-        return type;
     }
 }

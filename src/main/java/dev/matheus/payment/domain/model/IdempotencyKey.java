@@ -1,14 +1,20 @@
 package dev.matheus.payment.domain.model;
 
-import java.util.Objects;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
+@Getter
+@Accessors(fluent = true)
+@EqualsAndHashCode
+@ToString
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class IdempotencyKey {
 
     private final String value;
-
-    private IdempotencyKey(String value) {
-        this.value = value;
-    }
 
     public static IdempotencyKey of(String rawValue) {
         if (rawValue == null || rawValue.isBlank()) {
@@ -19,30 +25,5 @@ public final class IdempotencyKey {
             throw new IllegalArgumentException("idempotency key must be at most 100 characters");
         }
         return new IdempotencyKey(normalized);
-    }
-
-    public String value() {
-        return value;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof IdempotencyKey that)) {
-            return false;
-        }
-        return value.equals(that.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(value);
-    }
-
-    @Override
-    public String toString() {
-        return value;
     }
 }

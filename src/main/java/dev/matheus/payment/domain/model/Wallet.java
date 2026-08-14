@@ -1,7 +1,11 @@
 package dev.matheus.payment.domain.model;
 
 import java.util.Objects;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 
+@Getter
+@Accessors(fluent = true)
 public final class Wallet {
 
     private final WalletId id;
@@ -29,17 +33,5 @@ public final class Wallet {
     public void credit(Money amount) {
         Objects.requireNonNull(amount, "amount is required");
         this.balance = this.balance.add(amount);
-    }
-
-    public WalletId id() {
-        return id;
-    }
-
-    public UserId ownerId() {
-        return ownerId;
-    }
-
-    public Money balance() {
-        return balance;
     }
 }

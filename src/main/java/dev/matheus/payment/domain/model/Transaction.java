@@ -10,7 +10,12 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 
+@Getter
+@Accessors(fluent = true)
 public final class Transaction {
 
     private final TransactionId id;
@@ -22,6 +27,8 @@ public final class Transaction {
     private String failureReason;
     private final Instant createdAt;
     private Instant completedAt;
+
+    @Getter(AccessLevel.NONE)
     private final List<DomainEvent> events = new ArrayList<>();
 
     private Transaction(
@@ -109,41 +116,5 @@ public final class Transaction {
         List<DomainEvent> drained = List.copyOf(events);
         events.clear();
         return drained;
-    }
-
-    public TransactionId id() {
-        return id;
-    }
-
-    public IdempotencyKey idempotencyKey() {
-        return idempotencyKey;
-    }
-
-    public UserId payerId() {
-        return payerId;
-    }
-
-    public UserId payeeId() {
-        return payeeId;
-    }
-
-    public Money amount() {
-        return amount;
-    }
-
-    public TransactionStatus status() {
-        return status;
-    }
-
-    public String failureReason() {
-        return failureReason;
-    }
-
-    public Instant createdAt() {
-        return createdAt;
-    }
-
-    public Instant completedAt() {
-        return completedAt;
     }
 }

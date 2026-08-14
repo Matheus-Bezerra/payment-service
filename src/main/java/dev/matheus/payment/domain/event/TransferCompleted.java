@@ -5,7 +5,11 @@ import dev.matheus.payment.domain.model.TransactionId;
 import dev.matheus.payment.domain.model.UserId;
 import java.time.Instant;
 import java.util.Objects;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 
+@Getter
+@Accessors(fluent = true)
 public final class TransferCompleted implements DomainEvent {
 
     private final TransactionId transactionId;
@@ -26,26 +30,5 @@ public final class TransferCompleted implements DomainEvent {
         this.payeeId = Objects.requireNonNull(payeeId);
         this.amount = Objects.requireNonNull(amount);
         this.occurredAt = Objects.requireNonNull(occurredAt);
-    }
-
-    public TransactionId transactionId() {
-        return transactionId;
-    }
-
-    public UserId payerId() {
-        return payerId;
-    }
-
-    public UserId payeeId() {
-        return payeeId;
-    }
-
-    public Money amount() {
-        return amount;
-    }
-
-    @Override
-    public Instant occurredAt() {
-        return occurredAt;
     }
 }

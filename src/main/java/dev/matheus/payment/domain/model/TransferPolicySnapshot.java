@@ -3,7 +3,11 @@ package dev.matheus.payment.domain.model;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Objects;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 
+@Getter
+@Accessors(fluent = true)
 public final class TransferPolicySnapshot {
 
     public static final ZoneId ZONE = ZoneId.of("America/Sao_Paulo");
@@ -44,25 +48,5 @@ public final class TransferPolicySnapshot {
                 payerSpentToday,
                 payerTransfersInLastMinute
         );
-    }
-
-    public Money amount() {
-        return amount;
-    }
-
-    public Instant occurredAt() {
-        return occurredAt;
-    }
-
-    public ZoneId zone() {
-        return zone;
-    }
-
-    public Money payerSpentToday() {
-        return payerSpentToday;
-    }
-
-    public int payerTransfersInLastMinute() {
-        return payerTransfersInLastMinute;
     }
 }
