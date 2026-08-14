@@ -8,16 +8,25 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 @Configuration
-@EnableConfigurationProperties(AuthorizerProperties.class)
+@EnableConfigurationProperties({AuthorizerProperties.class, NotifierProperties.class})
 public class ClientConfig {
 
     @Bean
     RestClient authorizerRestClient(AuthorizerProperties properties) {
+        return restClient(properties.baseUrl(), properties.connectTimeout(), properties.readTimeout());
+    }
+
+    @Bean
+    RestClient notifierRestClient(NotifierProperties properties) {
+        return restClient(properties.baseUrl(), properties.connectTimeout(), properties.readTimeout());
+    }
+
+    private static RestClient restClient(String baseUrl, Duration connectTimeout, Duration readTimeout) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(orDefault(properties.connectTimeout()));
-        factory.setReadTimeout(orDefault(properties.readTimeout()));
+        factory.setConnectTimeout(orDefault(connectTimeout));
+        factory.setReadTimeout(orDefault(readTimeout));
         return RestClient.builder()
-                .baseUrl(properties.baseUrl())
+                .baseUrl(baseUrl)
                 .requestFactory(factory)
                 .build();
     }

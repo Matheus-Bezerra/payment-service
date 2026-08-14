@@ -13,6 +13,15 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: validate
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:payment}
+    password: ${SPRING_RABBITMQ_PASSWORD:payment}
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
 
 management:
   endpoints:
@@ -31,3 +40,22 @@ payment:
     base-url: ${PAYMENT_AUTHORIZER_BASE_URL:https://util.devi.tools}
     connect-timeout: 2s
     read-timeout: 2s
+  notifier:
+    base-url: ${PAYMENT_NOTIFIER_BASE_URL:https://util.devi.tools}
+    connect-timeout: 2s
+    read-timeout: 2s
+  messaging:
+    exchange: payment.notifications
+    routing-key: transfer.completed
+    queue: payment.notifications.transfer-completed
+    dlq: payment.notifications.transfer-completed.dlq
+    dlq-routing-key: transfer.completed.dlq
+    outbox-poll-interval: 2s
+    outbox-batch-size: 10
+    outbox-max-attempts: 5
+    publisher-confirm-timeout: 5s
+    retry:
+      max-attempts: 3
+      initial-interval: 200ms
+      multiplier: 2.0
+      max-interval: 2s
