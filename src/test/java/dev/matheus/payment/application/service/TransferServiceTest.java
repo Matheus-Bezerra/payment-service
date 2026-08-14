@@ -47,6 +47,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionOperations;
 
 @ExtendWith(MockitoExtension.class)
 class TransferServiceTest {
@@ -84,7 +85,8 @@ class TransferServiceTest {
                 transactionRepository,
                 authorizationPort,
                 outboxPort,
-                clockPort
+                clockPort,
+                TransactionOperations.withoutTransaction()
         );
 
         payerId = UserId.generate();
