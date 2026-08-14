@@ -2,13 +2,13 @@
 
 Implementação do desafio back-end [PicPay Simplificado](https://github.com/PicPay/picpay-desafio-backend): plataforma de pagamentos com transferência entre usuários comuns e lojistas.
 
-**Stack deste repositório:** Java, Spring Boot, Maven, PostgreSQL.
+**Stack deste repositório:** Java, Spring Boot, Maven, PostgreSQL, RabbitMQ.
 
-O recorte principal é o fluxo de **`POST /transfer`**. Cadastro, autenticação e frontend não entram na avaliação do desafio (seed de usuários basta).
+O recorte principal é o fluxo de **`POST /transfer`**. Cadastro, autenticação e frontend não entram na avaliação do desafio (seed de usuários basta). Notificação ao payee é assíncrona (outbox + RabbitMQ) e não faz parte da resposta HTTP.
 
 Documentação de regras, modelo, schema, contrato HTTP e checklist de implementação: [`.docs/`](.docs/).
 
-**Stack de implementação:** Java 25, Spring Boot 4.1, Maven, PostgreSQL 18, Docker Compose.
+**Stack de implementação:** Java 25, Spring Boot 4.1, Maven, PostgreSQL 18, RabbitMQ 4, Docker Compose.
 
 ---
 
@@ -20,12 +20,13 @@ Documentação de regras, modelo, schema, contrato HTTP e checklist de implement
 docker compose up --build
 ```
 
-Sobe PostgreSQL (`postgres:18`) e a API na porta `8080`.
+Sobe PostgreSQL (`postgres:18`), RabbitMQ (`rabbitmq:4-management`) e a API na porta `8080`.
+O painel do RabbitMQ fica em `http://localhost:15672` (usuário/senha `payment`/`payment`) — só para uso local.
 
-### Só o banco no Docker (API no IDE / Maven)
+### Só o banco e o broker no Docker (API no IDE / Maven)
 
 ```bash
-docker compose up postgres
+docker compose up postgres rabbitmq
 SPRING_PROFILES_ACTIVE=local ./mvnw spring-boot:run
 ```
 
@@ -35,7 +36,7 @@ SPRING_PROFILES_ACTIVE=local ./mvnw spring-boot:run
 curl -s http://localhost:8080/actuator/health
 ```
 
-Esperado: status `UP` (com detalhe `db` `UP` quando o Postgres estiver acessível).
+Esperado: status `UP` (com detalhe `db` e `rabbit` `UP` quando Postgres e RabbitMQ estiverem acessíveis).
 
 Checklist de etapas: [`.docs/implementation-checklist.md`](.docs/implementation-checklist.md).
 
