@@ -105,11 +105,11 @@ Fila não entra no fluxo síncrono do `POST /transfer`.
 
 Objetivo: JPA implementa os ports de repositório.
 
-- [ ] Entidades JPA em `adapter/out/persistence/entity` (não são o domínio).
-- [ ] Spring Data repositories + persistence adapters + mappers `Domain ↔ JpaEntity`.
-- [ ] Locks e ordem de lock das carteiras conforme [database-design.md](database-design.md).
-- [ ] Outbox persistida **na mesma transação** do débito/crédito. Ainda sem publicar no RabbitMQ.
-- [ ] Testes de persistência (Testcontainers PostgreSQL).
+- [x] Entidades JPA em `adapter/out/persistence/entity` (não são o domínio).
+- [x] Spring Data repositories + persistence adapters + mappers `Domain ↔ JpaEntity`.
+- [x] Locks e ordem de lock das carteiras conforme [database-design.md](database-design.md).
+- [x] Outbox persistida **na mesma transação** do débito/crédito. Ainda sem publicar no RabbitMQ.
+- [x] Testes de persistência (Testcontainers PostgreSQL).
 
 ---
 
