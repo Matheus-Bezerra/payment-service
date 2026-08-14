@@ -143,12 +143,12 @@ Objetivo: consulta síncrona ao mock antes de finalizar a transferência.
 
 Objetivo: notificar o payee depois do commit, com retry/backoff/DLQ.
 
-- [ ] `rabbitmq` no `compose.yml` (imagem oficial). Ainda sem misturar com o setup antigo.
-- [ ] Publisher lê a outbox **depois** do commit e publica no RabbitMQ.
-- [ ] Consumer/worker só notifica (`POST https://util.devi.tools/api/v1/notify`). Não processa transferência.
-- [ ] Retry com backoff + DLQ. Consumidor idempotente.
-- [ ] Envelope de evento alinhado à skill (ids de correlação, `eventType`, payload).
-- [ ] Testes de publicação, idempotência, retry e DLQ (Testcontainers RabbitMQ).
+- [x] `rabbitmq` no `compose.yml` (imagem oficial). Ainda sem misturar com o setup antigo.
+- [x] Publisher lê a outbox **depois** do commit e publica no RabbitMQ.
+- [x] Consumer/worker só notifica (`POST https://util.devi.tools/api/v1/notify`). Não processa transferência.
+- [x] Retry com backoff + DLQ. Consumidor idempotente.
+- [x] Envelope de evento alinhado à skill (ids de correlação, `eventType`, payload).
+- [x] Testes de publicação, idempotência, retry e DLQ (Testcontainers RabbitMQ).
 
 ---
 
