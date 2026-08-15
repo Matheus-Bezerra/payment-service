@@ -156,9 +156,9 @@ Objetivo: notificar o payee depois do commit, com retry/backoff/DLQ.
 
 Objetivo: dados para exercitar `POST /transfer`. Cadastro e autenticação continuam fora de escopo.
 
-- [ ] Seed (migration ou runner local) com usuários/carteiras do [api-spec.md](api-spec.md).
-- [ ] Pelo menos um `COMMON` (payer) e um `MERCHANT` (payee), com saldo.
-- [ ] Sem endpoint de cadastro, a menos que o usuário peça depois.
+- [x] Seed (migration ou runner local) com usuários/carteiras do [api-spec.md](api-spec.md).
+- [x] Pelo menos um `COMMON` (payer) e um `MERCHANT` (payee), com saldo.
+- [x] Sem endpoint de cadastro, a menos que o usuário peça depois.
 
 ---
 
