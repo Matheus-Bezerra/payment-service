@@ -38,6 +38,38 @@ curl -s http://localhost:8080/actuator/health
 
 Esperado: status `UP` (com detalhe `db` e `rabbit` `UP` quando Postgres e RabbitMQ estiverem acessíveis).
 
+### Swagger
+
+Com a API no ar, a UI fica em [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) (spec OpenAPI em `/v3/api-docs`).
+
+Dá para testar o `POST /transfer` pelo **Try it out**, usando os IDs da tabela abaixo. O header `Idempotency-Key` é obrigatório: **gere uma UUID nova a cada tentativa** (no Swagger, não reutilize a chave de exemplo). A mesma chave + o mesmo body é replay do resultado já gravado — se a primeira falhou com 502, as próximas com a mesma chave também voltam 502, sem chamar o autorizador de novo.
+
+O mock `GET https://util.devi.tools/api/v2/authorize` é instável de propósito (às vezes 200, às vezes 5xx) e o certificado TLS dele está expirado. No Docker e no profile `local` a API ignora essa verificação (`PAYMENT_HTTP_SSL_VERIFY=false`) só para conseguir falar com o mock. Timeout: 2s. Lojista não envia — `payer` precisa ser `COMMON`.
+
+### Usuários de seed
+
+Quatro usuários entram no boot **só no ambiente local** (`payment.seed.enabled=true`): Docker Compose (`PAYMENT_SEED_ENABLED=true`) e IDE com `SPRING_PROFILES_ACTIVE=local`. Em UAT/prod o default é `false` — o Flyway cria só o schema (V1–V4). Sem endpoint de cadastro. Senha local de todos: `123456` (no banco só o hash BCrypt). Restart não reseta saldo já movimentado.
+
+| Papel | Nome | User ID | E-mail | Saldo |
+|-------|------|---------|--------|-------|
+| COMMON (payer) | João Exemplo | `0190a1b2-c3d4-7000-8000-000000000004` | `joao.comum@example.com` | `50000.00` |
+| COMMON | Matheus | `0190a1b2-c3d4-7000-8000-000000000006` | `matheus@example.com` | `100000.00` |
+| MERCHANT (payee) | Loja Exemplo | `0190a1b2-c3d4-7000-8000-000000000015` | `loja@example.com` | `10000.00` |
+| MERCHANT | Mercado Exemplo | `0190a1b2-c3d4-7000-8000-000000000016` | `mercado@example.com` | `10000.00` |
+
+Exemplo de transferência (João → Loja). `uuidgen` evita reusar a mesma chave:
+
+```bash
+curl -s -X POST http://localhost:8080/transfer \
+  -H 'Content-Type: application/json' \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -d '{
+    "value": 100.0,
+    "payer": "0190a1b2-c3d4-7000-8000-000000000004",
+    "payee": "0190a1b2-c3d4-7000-8000-000000000015"
+  }'
+```
+
 Checklist de etapas: [`.docs/implementation-checklist.md`](.docs/implementation-checklist.md).
 
 ---
@@ -64,11 +96,12 @@ O desafio avalia o fluxo de transferência entre dois usuários:
 ```http
 POST /transfer
 Content-Type: application/json
+Idempotency-Key: <gere uma UUID nova a cada tentativa>
 
 {
   "value": 100.0,
-  "payer": 4,
-  "payee": 15
+  "payer": "0190a1b2-c3d4-7000-8000-000000000004",
+  "payee": "0190a1b2-c3d4-7000-8000-000000000015"
 }
 ```
 
