@@ -48,6 +48,9 @@ services:
       SPRING_RABBITMQ_USERNAME: payment
       SPRING_RABBITMQ_PASSWORD: payment
       TZ: America/Sao_Paulo
+      # Official challenge mock currently serves an expired TLS certificate.
+      PAYMENT_HTTP_SSL_VERIFY: "false"
+      PAYMENT_SEED_ENABLED: "true"
     ports:
       - "8080:8080"
 
