@@ -4,6 +4,8 @@ import dev.matheus.payment.adapter.out.client.dto.AuthorizationResponse;
 import dev.matheus.payment.application.exception.AuthorizationUnavailableException;
 import dev.matheus.payment.application.port.out.AuthorizationPort;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -13,6 +15,8 @@ import org.springframework.web.client.RestClientException;
 @Component
 @RequiredArgsConstructor
 public class AuthorizationClientAdapter implements AuthorizationPort {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthorizationClientAdapter.class);
 
     static final String UNAVAILABLE_MESSAGE = "authorization service unavailable";
 
@@ -34,6 +38,7 @@ public class AuthorizationClientAdapter implements AuthorizationPort {
         } catch (AuthorizationUnavailableException ex) {
             throw ex;
         } catch (RestClientException ex) {
+            log.warn("authorizer request failed: {}", ex.toString());
             throw new AuthorizationUnavailableException(UNAVAILABLE_MESSAGE, ex);
         }
     }
