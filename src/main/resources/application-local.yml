@@ -3,3 +3,9 @@ spring:
     url: jdbc:postgresql://localhost:5432/payment
     username: payment
     password: payment
+
+payment:
+  seed:
+    enabled: true
+  http:
+    ssl-verify: false
