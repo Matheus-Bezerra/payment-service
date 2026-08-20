@@ -34,12 +34,16 @@ import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionOperations;
 
 @Service
 @RequiredArgsConstructor
 public class TransferService {
+
+    private static final Logger log = LoggerFactory.getLogger(TransferService.class);
 
     private final UserRepository userRepository;
     private final WalletRepository walletRepository;
@@ -63,6 +67,13 @@ public class TransferService {
             return replayExisting(command);
         }
 
+        log.info(
+                "transfer started transactionId={} payer={} payee={}",
+                transaction.id().value(),
+                command.payerId().value(),
+                command.payeeId().value()
+        );
+
         try {
             User payer = requireUser(command.payerId(), "payer");
             requireUser(command.payeeId(), "payee");
@@ -80,8 +91,15 @@ public class TransferService {
                 throw new TransferNotAuthorizedException("transfer was not authorized");
             }
 
-            return new TransferResult(settle(transaction), false);
+            Transaction completed = settle(transaction);
+            log.info("transfer completed transactionId={}", completed.id().value());
+            return new TransferResult(completed, false);
         } catch (DomainException | AuthorizationUnavailableException ex) {
+            log.info(
+                    "transfer failed transactionId={} reason={}",
+                    transaction.id().value(),
+                    ex.getClass().getSimpleName()
+            );
             markFailed(transaction, ex.getMessage());
             throw ex;
         }
@@ -102,6 +120,7 @@ public class TransferService {
             throw new TransferAlreadyFailedException(existing.failureReason());
         }
 
+        log.info("transfer replayed transactionId={} status={}", existing.id().value(), existing.status());
         return new TransferResult(existing, true);
     }
 

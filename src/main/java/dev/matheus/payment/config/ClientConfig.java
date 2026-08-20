@@ -29,22 +29,43 @@ public class ClientConfig {
     private static final Logger log = LoggerFactory.getLogger(ClientConfig.class);
 
     @Bean
-    RestClient authorizerRestClient(AuthorizerProperties properties, HttpClientProperties http) {
-        return restClient(properties.baseUrl(), properties.connectTimeout(), properties.readTimeout(), http);
+    RestClient authorizerRestClient(
+            AuthorizerProperties properties,
+            HttpClientProperties http,
+            RestClient.Builder restClientBuilder
+    ) {
+        return restClient(
+                restClientBuilder,
+                properties.baseUrl(),
+                properties.connectTimeout(),
+                properties.readTimeout(),
+                http
+        );
     }
 
     @Bean
-    RestClient notifierRestClient(NotifierProperties properties, HttpClientProperties http) {
-        return restClient(properties.baseUrl(), properties.connectTimeout(), properties.readTimeout(), http);
+    RestClient notifierRestClient(
+            NotifierProperties properties,
+            HttpClientProperties http,
+            RestClient.Builder restClientBuilder
+    ) {
+        return restClient(
+                restClientBuilder,
+                properties.baseUrl(),
+                properties.connectTimeout(),
+                properties.readTimeout(),
+                http
+        );
     }
 
     private static RestClient restClient(
+            RestClient.Builder builder,
             String baseUrl,
             Duration connectTimeout,
             Duration readTimeout,
             HttpClientProperties http
     ) {
-        return RestClient.builder()
+        return builder
                 .baseUrl(baseUrl)
                 .requestFactory(requestFactory(connectTimeout, readTimeout, http.sslVerify()))
                 .build();
