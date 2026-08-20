@@ -162,14 +162,25 @@ Objetivo: dados para exercitar `POST /transfer`. Cadastro e autenticação conti
 
 ---
 
-## 10. Testes de fluxo e observabilidade extra
+## 10. Observabilidade e logs
 
-Objetivo: fechar o recorte avaliado e o baseline operacional. Não antecipar tracing/dashboards sem necessidade.
+Objetivo: baseline operacional local (NFR-05) com stack Grafana. Sem Loki, Datadog ou dashboards de negócio.
+
+- [x] Logs em `stdout` (Logback), sem senha/documento/token/body; pattern com `correlationId`, `traceId`, `spanId`.
+- [x] `correlationId` por request: header opcional `X-Correlation-Id`, MDC, eco na resposta (inclusive erros).
+- [x] Health checks: `/actuator/health` com `db` e `rabbit` (teste de integração).
+- [x] Micrometer + `/actuator/prometheus` e `/actuator/metrics`.
+- [x] OpenTelemetry (Micrometer Tracing) exportando OTLP para Tempo.
+- [x] Prometheus + Tempo + Grafana no Compose (dashboard JVM/HTTP; traces no Explore).
+
+---
+
+## 11. Testes de fluxo e CI
+
+Objetivo: fechar o recorte avaliado com o fluxo HTTP ponta a ponta. Não misturar com observabilidade.
 
 - [ ] Teste de integração do fluxo feliz `POST /transfer`.
 - [ ] Casos: lojista como payer, saldo insuficiente, autorizador recusa, replay de `Idempotency-Key`, políticas POL-01–04.
-- [ ] Baseline da skill: logs em `stdout`, sem dados sensíveis, `correlationId`, health checks.
-- [ ] Micrometer / OpenTelemetry / dashboards só se aprovados.
 - [ ] CI (build + testes) só se pedido.
 
 ---
