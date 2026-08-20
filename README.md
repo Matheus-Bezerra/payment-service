@@ -20,7 +20,7 @@ Documentação de regras, modelo, schema, contrato HTTP e checklist de implement
 docker compose up --build
 ```
 
-Sobe PostgreSQL (`postgres:18`), RabbitMQ (`rabbitmq:4-management`) e a API na porta `8080`.
+Sobe PostgreSQL (`postgres:18`), RabbitMQ (`rabbitmq:4-management`), a API na porta `8080` e a stack local de observabilidade (Prometheus, Tempo, Grafana).
 O painel do RabbitMQ fica em `http://localhost:15672` (usuário/senha `payment`/`payment`) — só para uso local.
 
 ### Só o banco e o broker no Docker (API no IDE / Maven)
@@ -30,6 +30,8 @@ docker compose up postgres rabbitmq
 SPRING_PROFILES_ACTIVE=local ./mvnw spring-boot:run
 ```
 
+Para traces no Grafana com a API no IDE, suba também o Tempo (`docker compose up tempo`) — o default da API exporta OTLP para `http://localhost:4318/v1/traces`. Métricas no Grafana exigem a API no Compose (`app:8080`), porque o Prometheus raspa esse host.
+
 ### Health check
 
 ```bash
@@ -37,6 +39,27 @@ curl -s http://localhost:8080/actuator/health
 ```
 
 Esperado: status `UP` (com detalhe `db` e `rabbit` `UP` quando Postgres e RabbitMQ estiverem acessíveis).
+
+Métricas em Prometheus: `GET /actuator/prometheus`. JSON em `GET /actuator/metrics`.
+
+### Observabilidade (local)
+
+Stack só para o desafio — sem autenticação forte, sem Loki, sem Datadog. Em um ambiente com vários serviços, Prometheus/Tempo/Grafana seriam **compartilhados**, não duplicados por API.
+
+| URL | O que é | Login |
+|-----|---------|-------|
+| [http://localhost:3000](http://localhost:3000) | Grafana (dashboards + Explore) | `admin` / `grafana` |
+| [http://localhost:3000/explore](http://localhost:3000/explore) | Grafana Explore — traces (datasource Tempo) | mesmo login |
+| [http://localhost:9090](http://localhost:9090) | Prometheus (scrape/status; UI básica) | — |
+| stdout da API | Logs | — |
+
+**Logs:** stdout (Logback). Cada linha inclui `correlationId`, `traceId` e `spanId` quando existirem. Não logamos senha, CPF/CNPJ completo, tokens nem o body da request.
+
+**Correlation id:** header opcional `X-Correlation-Id`. Se o cliente não mandar, a API gera um UUID, coloca no MDC dos logs e devolve o mesmo valor na resposta (inclusive em erros). Não substitui `Idempotency-Key` e não faz replay da transferência.
+
+**Métricas:** dashboard **Payment API** no Grafana (taxa HTTP, latência p95, heap JVM, CPU). Datasource Prometheus (`http://prometheus:9090` na rede Docker).
+
+**Traces:** Grafana → **Explore** → datasource **Tempo**. Gere um `POST /transfer`, copie o `traceId` do log da app e cole no Explore. Cada request HTTP tem um `traceId` novo; `spanId` muda a cada span (controller, JDBC, autorizador…). Entre serviços o contexto iria no header `traceparent` (W3C), não por thread.
 
 ### Swagger
 
