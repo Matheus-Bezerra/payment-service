@@ -32,6 +32,46 @@ services:
       timeout: 5s
       retries: 10
 
+  tempo:
+    image: grafana/tempo:2.8.2
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./observability/tempo.yml:/etc/tempo.yaml:ro
+    ports:
+      - "4318:4318"
+      - "3200:3200"
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=24h
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      app:
+        condition: service_started
+
+  grafana:
+    image: grafana/grafana:11.6.1
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: grafana
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+      - tempo
+
   app:
     build: .
     depends_on:
@@ -39,6 +79,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      tempo:
+        condition: service_started
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/payment
       SPRING_DATASOURCE_USERNAME: payment
@@ -51,9 +93,11 @@ services:
       # Official challenge mock currently serves an expired TLS certificate.
       PAYMENT_HTTP_SSL_VERIFY: "false"
       PAYMENT_SEED_ENABLED: "true"
+      MANAGEMENT_OTLP_TRACING_ENDPOINT: http://tempo:4318/v1/traces
     ports:
       - "8080:8080"
 
 volumes:
   postgres_data:
   rabbitmq_data:
+  grafana_data:
