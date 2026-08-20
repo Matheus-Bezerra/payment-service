@@ -179,9 +179,9 @@ Objetivo: baseline operacional local (NFR-05) com stack Grafana. Sem Loki, Datad
 
 Objetivo: fechar o recorte avaliado com o fluxo HTTP ponta a ponta. Não misturar com observabilidade.
 
-- [ ] Teste de integração do fluxo feliz `POST /transfer`.
-- [ ] Casos: lojista como payer, saldo insuficiente, autorizador recusa, replay de `Idempotency-Key`, políticas POL-01–04.
-- [ ] CI (build + testes) só se pedido.
+- [x] Teste de integração do fluxo feliz `POST /transfer`.
+- [x] Casos: lojista como payer, saldo insuficiente, autorizador recusa, replay de `Idempotency-Key`, políticas POL-01–04.
+- [x] CI (build + testes) só se pedido.
 
 ---
 
