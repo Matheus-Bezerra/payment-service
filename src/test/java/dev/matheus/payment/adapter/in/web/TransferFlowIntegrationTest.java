@@ -48,7 +48,11 @@ import org.testcontainers.rabbitmq.RabbitMQContainer;
 @SpringBootTest
 @AutoConfigureMockMvc
 @Testcontainers
-@TestPropertySource(properties = "management.opentelemetry.tracing.export.otlp.enabled=false")
+@TestPropertySource(properties = {
+        "management.opentelemetry.tracing.export.otlp.enabled=false",
+        "spring.task.scheduling.enabled=false",
+        "spring.rabbitmq.listener.simple.auto-startup=false"
+})
 class TransferFlowIntegrationTest {
 
     private static final String JOAO = "0190a1b2-c3d4-7000-8000-000000000004";
@@ -78,7 +82,6 @@ class TransferFlowIntegrationTest {
     static void registerProperties(DynamicPropertyRegistry registry) {
         registry.add("payment.authorizer.base-url", wireMock::baseUrl);
         registry.add("payment.seed.enabled", () -> "true");
-        registry.add("spring.task.scheduling.enabled", () -> "false");
     }
 
     @Autowired
@@ -231,6 +234,12 @@ class TransferFlowIntegrationTest {
 
     @Test
     void pol03RejectsDailyLimit() throws Exception {
+        Instant daytime = LocalDate.now(TransferPolicySnapshot.ZONE)
+                .atTime(15, 0)
+                .atZone(TransferPolicySnapshot.ZONE)
+                .toInstant();
+        when(clockPort.now()).thenReturn(daytime);
+
         for (int i = 0; i < 4; i++) {
             postTransfer(body("20000.00", MATHEUS, LOJA), newKey())
                     .andExpect(status().isCreated());
